@@ -1,15 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Santa</title>
+    <title>🎅 Secret Santa Generator</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
-    <h1>Secret Santa</h1>
-    <p>Welcome to Secret Santa!</p>
-    
+    <div class="snowflakes" id="snowflakes"></div>
+
+    <div class="container">
+        <h1>🎅 Secret Santa</h1>
+        <p class="subtitle">Create magical gift exchanges with smart matching!</p>
+
+        <!-- Rules Card -->
+        <div class="card">
+            <h2>How it works</h2>
+            <ul class="rules-list">
+                <li><strong>Seed:</strong> Use the same seed to reproduce the exact same distribution</li>
+                <li><strong>Exclusion Groups:</strong> People in the same group won't give gifts to each other</li>
+                <li><strong>No Short Loops:</strong> No A→B→A patterns - minimum cycle length is 3</li>
+            </ul>
+        </div>
+
+        <!-- Seed Card -->
+        <div class="card">
+            <h2>Seed Configuration</h2>
+            <div class="form-group">
+                <label for="seed">Random Seed (leave empty for random)</label>
+                <div class="input-with-button">
+                    <input type="number" id="seed" placeholder="Enter a number, e.g., 12345">
+                    <button class="btn-secondary" onclick="generateRandomSeed()">🎲 Random</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Participants Card -->
+        <div class="card">
+            <h2>Participants</h2>
+            <div class="form-group">
+                <label for="participantName">Add Participant</label>
+                <div class="input-with-button">
+                    <input type="text" id="participantName" placeholder="Enter name"
+                        onkeypress="handleParticipantKeypress(event)">
+                    <button class="btn-primary" onclick="addParticipant()">➕ Add</button>
+                </div>
+            </div>
+            <div class="participants-list" id="participantsList"></div>
+        </div>
+
+        <!-- Exclusion Groups Card -->
+        <div class="card">
+            <h2>Exclusion Groups</h2>
+            <p style="color: #666; margin-bottom: 15px;">People in the same group won't give gifts to each other (e.g.,
+                couples, family members)</p>
+
+            <div class="form-group">
+                <label>Select members for new exclusion group:</label>
+                <div class="checkbox-group" id="exclusionCheckboxes">
+                    <p style="color: #999;">Add participants first</p>
+                </div>
+                <button class="btn-secondary" onclick="createExclusionGroup()" style="margin-top: 10px;">🚫 Create
+                    Exclusion Group</button>
+            </div>
+
+            <div id="exclusionGroupsList"></div>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="btn-primary generate-btn" onclick="generateAssignments()">
+            🎄 Generate Secret Santa Assignments 🎄
+        </button>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Results Card -->
+        <div class="card results" id="resultsCard">
+            <h2>🎉 Assignments</h2>
+            <div class="seed-info" id="seedInfo"></div>
+            
+            <div class="view-toggle">
+                <button id="listViewBtn" class="active" onclick="switchView('list')">📋 List View</button>
+                <button id="graphViewBtn" onclick="switchView('graph')">🔗 Graph View</button>
+            </div>
+            
+            <div class="list-view" id="listView">
+                <div id="assignmentsList"></div>
+            </div>
+            
+            <div class="graph-container" id="graphContainer">
+                <svg id="graphSvg" viewBox="0 0 600 400">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#667eea" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <div id="individualLinksContainer"></div>
+
+            <div class="share-section">
+                <label>📤 Share this configuration:</label>
+                <div class="share-url">
+                    <input type="text" id="shareUrl" readonly placeholder="Generate assignments to get a shareable link">
+                    <button onclick="copyShareUrl()">📋 Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="copied-toast" id="copiedToast">✓ Copied to clipboard!</div>
+    </div>
+
+    <footer>
+        <p>Made with ❤️ for the holiday season</p>
+    </footer>
+
     <script src="assets/js/main.js"></script>
 </body>
+
 </html>
