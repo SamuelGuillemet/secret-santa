@@ -291,6 +291,7 @@ button {
 .results.show {
     display: block;
     animation: slideIn 0.5s ease;
+    margin-top: 30px;
 }
 
 @keyframes slideIn {
