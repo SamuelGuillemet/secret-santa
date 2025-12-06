@@ -2,9 +2,26 @@
 let participants = [];
 let exclusionGroups = [];
 
+function getCurrentConfig(seed, viewPerson) {
+    return {
+        participants: [...participants],
+        exclusionGroups: exclusionGroups.map(g => [...g]),
+        seed: seed || null,
+        view: viewPerson || null
+    };
+}
+
+function encodeConfigToUrl(config) {
+    const json = JSON.stringify(config);
+    const b64 = btoa(encodeURIComponent(json)); // safe for UTF-8-ish chars
+    const url = new URL(globalThis.location.href.split('?')[0]);
+    url.searchParams.set('config', b64);
+    return url.toString();
+}
+
 // Seeded Random Number Generator (Mulberry32)
 function mulberry32(seed) {
-    return function () {
+    return () => {
         let t = seed += 0x6D2B79F5;
         t = Math.imul(t ^ t >>> 15, t | 1);
         t ^= t + Math.imul(t ^ t >>> 7, t | 61);
@@ -33,10 +50,10 @@ function createSnowflakes() {
         const snowflake = document.createElement('div');
         snowflake.className = 'snowflake';
         snowflake.textContent = snowflakeChars[Math.floor(Math.random() * snowflakeChars.length)];
-        snowflake.style.left = Math.random() * 100 + '%';
-        snowflake.style.animationDuration = (Math.random() * 3 + 5) + 's';
-        snowflake.style.animationDelay = Math.random() * 5 + 's';
-        snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'em';
+        snowflake.style.left = `${Math.random() * 100}%`;
+        snowflake.style.animationDuration = `${Math.random() * 3 + 5}s`;
+        snowflake.style.animationDelay = `${Math.random() * 5}s`;
+        snowflake.style.fontSize = `${Math.random() * 1 + 0.5}em`;
         container.appendChild(snowflake);
     }
 }
@@ -124,7 +141,9 @@ function createExclusionGroup() {
     updateExclusionGroupsList();
 
     // Uncheck all
-    checkboxes.forEach(cb => cb.checked = false);
+    for (const cb of checkboxes) {
+        cb.checked = false;
+    }
 }
 
 // Remove exclusion group
@@ -219,14 +238,14 @@ function generateAssignments() {
     }
 
     // Get or generate seed
-    let seedInput = document.getElementById('seed').value;
+    const seedInput = document.getElementById('seed').value;
     let seed;
 
     if (seedInput === '') {
         seed = Math.floor(Math.random() * 1000000);
         document.getElementById('seed').value = seed;
     } else {
-        seed = parseInt(seedInput);
+        seed = Number.parseInt(seedInput, 10);
     }
 
     const random = mulberry32(seed);
@@ -320,21 +339,8 @@ function generateIndividualLinks(assignments, seed) {
 
 // Generate URL for individual view
 function generateIndividualUrl(person, seed) {
-    const url = new URL(window.location.href.split('?')[0]);
-
-    url.searchParams.set('participants', participants.map(p => encodeURIComponent(p)).join(','));
-
-    if (exclusionGroups.length > 0) {
-        const exclusionsStr = exclusionGroups.map(group =>
-            group.map(m => encodeURIComponent(m)).join('|')
-        ).join(',');
-        url.searchParams.set('exclusions', exclusionsStr);
-    }
-
-    url.searchParams.set('seed', seed);
-    url.searchParams.set('view', encodeURIComponent(person));
-
-    return url.toString();
+    const config = getCurrentConfig(seed, person);
+    return encodeConfigToUrl(config);
 }
 
 // Show error
@@ -342,7 +348,7 @@ function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
     if (!errorDiv) return;
 
-    errorDiv.textContent = '❌ ' + message;
+    errorDiv.textContent = `❌ ${message}`;
     errorDiv.classList.add('show');
 }
 
@@ -356,12 +362,36 @@ function hideError() {
 
 // Load data from query parameters
 function loadFromQueryParams() {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
+    const configParam = params.get('config');
 
-    // Load participants
+    if (configParam) {
+        const json = decodeURIComponent(atob(configParam));
+        const cfg = JSON.parse(json);
+
+        participants = Array.isArray(cfg.participants) ? cfg.participants : [];
+        exclusionGroups = Array.isArray(cfg.exclusionGroups) ? cfg.exclusionGroups : [];
+
+        updateParticipantsList();
+        updateExclusionCheckboxes();
+        updateExclusionGroupsList();
+
+        if (cfg.seed != null) {
+            const seedInput = document.getElementById('seed');
+            if (seedInput) seedInput.value = cfg.seed;
+        }
+
+        const viewPerson = cfg.view;
+        if (viewPerson && participants.length >= 3 && cfg.seed != null) {
+            showIndividualView(viewPerson, Number.parseInt(cfg.seed, 10));
+            return;
+        }
+    }
+
+    // Fallback: legacy params (optional, can be removed if you don't care)
     const participantsParam = params.get('participants');
     if (participantsParam) {
-        participants = participantsParam.split(',').map(p => decodeURIComponent(p.trim())).filter(p => p);
+        participants = participantsParam.split(',').map(p => decodeURIComponent(p.trim())).filter(Boolean);
         updateParticipantsList();
         updateExclusionCheckboxes();
     }
@@ -370,7 +400,7 @@ function loadFromQueryParams() {
     const exclusionsParam = params.get('exclusions');
     if (exclusionsParam) {
         exclusionGroups = exclusionsParam.split(',').map(group =>
-            group.split('|').map(m => decodeURIComponent(m.trim())).filter(m => m)
+            group.split('|').map(m => decodeURIComponent(m.trim())).filter(Boolean)
         ).filter(group => group.length > 1);
         updateExclusionGroupsList();
     }
@@ -379,16 +409,7 @@ function loadFromQueryParams() {
     const seedParam = params.get('seed');
     if (seedParam) {
         const seedInput = document.getElementById('seed');
-        if (seedInput) {
-            seedInput.value = seedParam;
-        }
-    }
-
-    // Check for individual view mode
-    const viewPerson = params.get('view');
-    if (viewPerson && participants.length >= 3 && seedParam) {
-        showIndividualView(decodeURIComponent(viewPerson), parseInt(seedParam));
-        return;
+        if (seedInput) seedInput.value = seedParam;
     }
 
     // Auto-generate if autorun parameter is set
@@ -402,23 +423,7 @@ function showIndividualView(person, seed) {
     const random = mulberry32(seed);
     const assignments = generateValidAssignments(random);
 
-    // Generate backURL for main page witout view param
-    const backUrl = new URL(window.location.href.split('?')[0]);
-    if (participants.length > 0) {
-        backUrl.searchParams.set('participants', participants.map(p => encodeURIComponent(p)).join(','));
-    }
-    if (exclusionGroups.length > 0) {
-        const exclusionsStr = exclusionGroups.map(group =>
-            group.map(m => encodeURIComponent(m)).join('|')
-        ).join(',');
-        backUrl.searchParams.set('exclusions', exclusionsStr);
-    }
-    backUrl.searchParams.set('seed', seed);
-    backUrl.searchParams.delete('view');
-
-    console.log(`To go back to main page: ${backUrl.toString()}`);
-
-    if (!assignments || !assignments[person]) {
+    if (!assignments?.[person]) {
         document.body.innerHTML = `
             <div class="snowflakes" id="snowflakes"></div>
             <div class="container individual-view">
@@ -467,34 +472,19 @@ function showIndividualView(person, seed) {
 
 // Generate shareable URL
 function generateShareUrl(seed) {
-    const url = new URL(window.location.href.split('?')[0]);
-
-    if (participants.length > 0) {
-        url.searchParams.set('participants', participants.map(p => encodeURIComponent(p)).join(','));
-    }
-
-    if (exclusionGroups.length > 0) {
-        const exclusionsStr = exclusionGroups.map(group =>
-            group.map(m => encodeURIComponent(m)).join('|')
-        ).join(',');
-        url.searchParams.set('exclusions', exclusionsStr);
-    }
-
-    if (seed) {
-        url.searchParams.set('seed', seed);
-    }
-
-    return url.toString();
+    const config = getCurrentConfig(seed || null, null);
+    return encodeConfigToUrl(config);
 }
 
 // Update URL without reloading
 function updateUrlWithData(seed) {
-    const url = generateShareUrl(seed);
-    window.history.replaceState({}, '', url);
+    const config = getCurrentConfig(seed || null, null);
+    const url = encodeConfigToUrl(config);
+    globalThis.history.replaceState({}, '', url);
 
     const shareInput = document.getElementById('shareUrl');
     if (shareInput) {
-        shareInput.value = url + '&autorun=true';
+        shareInput.value = `${url}&autorun=true`;
     }
 }
 
@@ -555,7 +545,7 @@ function drawGraph(assignments) {
     const width = 600;
     const height = Math.max(400, n * 50);
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    container.style.minHeight = height + 'px';
+    container.style.minHeight = `${height}px`;
 
     // Position nodes in a circle
     const centerX = width / 2;
@@ -588,7 +578,7 @@ function drawGraph(assignments) {
         const midY = (start.y + end.y) / 2;
         const dx = end.x - start.x;
         const dy = end.y - start.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.hypot(dx, dy);
 
         // Curve outward from center
         const curveOffset = dist * 0.2;
@@ -630,7 +620,7 @@ function drawGraph(assignments) {
         circle.setAttribute('stroke-width', '3');
 
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.textContent = name.length > 8 ? name.substring(0, 7) + '…' : name;
+        text.textContent = name.length > 8 ? `${name.substring(0, 7)}…` : name;
 
         group.appendChild(circle);
         group.appendChild(text);
@@ -639,7 +629,7 @@ function drawGraph(assignments) {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     createSnowflakes();
     loadFromQueryParams();
 });
