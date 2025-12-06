@@ -115,7 +115,7 @@ function updateExclusionCheckboxes() {
     if (!container) return;
 
     if (participants.length === 0) {
-        container.innerHTML = '<p style="color: #999;">Add participants first</p>';
+        container.innerHTML = '<p style="color: #999;">Ajoutez d\'abord des participants</p>';
         return;
     }
 
@@ -133,7 +133,7 @@ function createExclusionGroup() {
     const selectedMembers = Array.from(checkboxes).map(cb => cb.value);
 
     if (selectedMembers.length < 2) {
-        showError('Please select at least 2 people for an exclusion group');
+        showError('Veuillez sélectionner au moins 2 personnes pour un groupe d\'exclusion');
         return;
     }
 
@@ -160,8 +160,8 @@ function updateExclusionGroupsList() {
     container.innerHTML = exclusionGroups.map((group, index) => `
         <div class="exclusion-group">
             <div class="exclusion-group-header">
-                <h4>🚫 Exclusion Group ${index + 1}</h4>
-                <button class="btn-danger" onclick="removeExclusionGroup(${index})">Remove</button>
+                <h4>🚫 Groupe d'exclusion ${index + 1}</h4>
+                <button class="btn-danger" onclick="removeExclusionGroup(${index})">Supprimer</button>
             </div>
             <div class="exclusion-members">
                 ${group.map(member => `<span class="exclusion-member">${member}</span>`).join('')}
@@ -233,7 +233,7 @@ function generateAssignments() {
     hideError();
 
     if (participants.length < 3) {
-        showError('You need at least 3 participants for Secret Santa (to avoid 2-person loops)');
+        showError('Vous avez besoin d\'au moins 3 participants pour le Secret Santa (pour éviter les boucles à 2 personnes)');
         return;
     }
 
@@ -254,7 +254,7 @@ function generateAssignments() {
     const assignments = generateValidAssignments(random);
 
     if (!assignments) {
-        showError('Unable to generate valid assignments with the current constraints. Try reducing exclusion groups or adding more participants.');
+        showError('Impossible de générer des tirages valides avec les contraintes actuelles. Essayez de réduire les groupes d\'exclusion ou d\'ajouter plus de participants.');
         return;
     }
 
@@ -270,7 +270,7 @@ function displayResults(assignments, seed) {
 
     if (!resultsCard || !assignmentsList || !seedInfo) return;
 
-    seedInfo.innerHTML = `<strong>🌱 Seed used:</strong> ${seed} (save this to reproduce the same results)`;
+    seedInfo.innerHTML = `<strong>🌱 Graine utilisée&nbsp;:</strong> ${seed} (conservez-la pour reproduire les mêmes tirages)`;
 
     assignmentsList.innerHTML = Object.entries(assignments).map(([giver, receiver]) => `
         <div class="assignment">
@@ -326,7 +326,7 @@ function generateIndividualLinks(assignments, seed) {
 
     container.innerHTML = `
         <div class="individual-links">
-            <h3>🔗 Individual Links (share privately with each person)</h3>
+            <h3>🔗 Liens individuels (partagez-les en privé avec chaque personne)</h3>
             <div class="individual-links-list">
                 ${Object.keys(assignments).map(person => {
         const url = generateIndividualUrl(person, seed);
@@ -429,9 +429,9 @@ function showIndividualView(person, seed) {
             <div class="container individual-view">
                 <h1>🎅 Secret Santa</h1>
                 <div class="card">
-                    <h2>Error</h2>
-                    <p style="color: #721c24;">Could not find assignment for "${person}". Please check the link.</p>
-                    <a href="${window.location.href.split('?')[0]}" class="back-link">← Back to main page</a>
+                    <h2>Erreur</h2>
+                    <p style="color: #721c24;">Impossible de trouver le tirage pour « ${person} ». Vérifiez le lien.</p>
+                    <a href="${globalThis.location.href.split('?')[0]}" class="back-link">← Retour à la page principale</a>
                 </div>
             </div>
         `;
@@ -445,25 +445,25 @@ function showIndividualView(person, seed) {
         <div class="snowflakes" id="snowflakes"></div>
         <div class="container individual-view">
             <h1>🎅 Secret Santa</h1>
-            <p class="subtitle">Your secret assignment is ready!</p>
+            <p class="subtitle">Votre tirage secret est prêt&nbsp;!</p>
             
             <div class="card">
-                <h2>Your Assignment</h2>
+                <h2>Votre tirage</h2>
                 <div class="individual-result">
                     <div class="person-name">🎁 ${person}</div>
                     <div class="gift-icon">🎄✨🎁</div>
-                    <div class="gives-to">You are giving a gift to...</div>
+                    <div class="gives-to">Vous offrez un cadeau à...</div>
                     <div class="receiver-name">${receiver}</div>
                 </div>
                 <p style="color: #666; margin-top: 20px; font-style: italic;">
-                    Remember: Keep it secret! 🤫
+                    Souvenez-vous&nbsp;: gardez-le secret&nbsp;! 🤫
                 </p>
             </div>
             
-            <a href="${window.location.href.split('?')[0]}" class="back-link">← Back to main page</a>
+            <a href="${globalThis.location.href.split('?')[0]}" class="back-link">← Retour à la page principale</a>
         </div>
         <footer>
-            <p>Made with ❤️ for the holiday season</p>
+            <p>Fait avec ❤️ pour la saison des fêtes</p>
         </footer>
     `;
 

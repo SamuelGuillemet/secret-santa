@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎅 Secret Santa Generator</title>
+    <title>🎅 Générateur du père Noël Secret</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
@@ -13,26 +13,26 @@
 
     <div class="container">
         <h1>🎅 Secret Santa</h1>
-        <p class="subtitle">Create magical gift exchanges with smart matching!</p>
+        <p class="subtitle">Créez des échanges de cadeaux magiques avec un tirage intelligent&nbsp;!</p>
 
         <!-- Rules Card -->
         <div class="card">
-            <h2>How it works</h2>
+            <h2>Comment ça marche</h2>
             <ul class="rules-list">
-                <li><strong>Seed:</strong> Use the same seed to reproduce the exact same distribution</li>
-                <li><strong>Exclusion Groups:</strong> People in the same group won't give gifts to each other</li>
-                <li><strong>No Short Loops:</strong> No A→B→A patterns - minimum cycle length is 3</li>
+                <li><strong>Graine :</strong> Utilisez la même graine pour reproduire la même distribution</li>
+                <li><strong>Groupes d'exclusion :</strong> Les personnes d'un même groupe ne s'offriront pas de cadeaux</li>
+                <li><strong>Pas de boucles courtes :</strong> Pas de schémas A→B→A — la longueur minimale d'un cycle est 3</li>
             </ul>
         </div>
 
         <!-- Seed Card -->
         <div class="card">
-            <h2>Seed Configuration</h2>
+            <h2>Configuration de la graine</h2>
             <div class="form-group">
-                <label for="seed">Random Seed (leave empty for random)</label>
+                <label for="seed">Graine aléatoire (laisser vide pour aléatoire)</label>
                 <div class="input-with-button">
-                    <input type="number" id="seed" placeholder="Enter a number, e.g., 12345">
-                    <button class="btn-secondary" onclick="generateRandomSeed()">🎲 Random</button>
+                    <input type="number" id="seed" placeholder="Entrez un nombre, ex. 12345">
+                    <button class="btn-secondary" onclick="generateRandomSeed()">🎲 Aléatoire</button>
                 </div>
             </div>
         </div>
@@ -41,11 +41,11 @@
         <div class="card">
             <h2>Participants</h2>
             <div class="form-group">
-                <label for="participantName">Add Participant</label>
+                <label for="participantName">Ajouter un participant</label>
                 <div class="input-with-button">
-                    <input type="text" id="participantName" placeholder="Enter name"
+                    <input type="text" id="participantName" placeholder="Entrez un nom"
                         onkeypress="handleParticipantKeypress(event)">
-                    <button class="btn-primary" onclick="addParticipant()">➕ Add</button>
+                    <button class="btn-primary" onclick="addParticipant()">➕ Ajouter</button>
                 </div>
             </div>
             <div class="participants-list" id="participantsList"></div>
@@ -53,17 +53,17 @@
 
         <!-- Exclusion Groups Card -->
         <div class="card">
-            <h2>Exclusion Groups</h2>
-            <p style="color: #666; margin-bottom: 15px;">People in the same group won't give gifts to each other (e.g.,
-                couples, family members)</p>
+            <h2>Groupes d'exclusion</h2>
+            <p style="color: #666; margin-bottom: 15px;">Les personnes d’un même groupe ne s’offrent pas de cadeaux (par ex.,
+                couples, membres de la famille)</p>
 
             <div class="form-group">
-                <label>Select members for new exclusion group:</label>
+                <label>Sélectionnez les membres pour le nouveau groupe d'exclusion :</label>
                 <div class="checkbox-group" id="exclusionCheckboxes">
-                    <p style="color: #999;">Add participants first</p>
+                    <p style="color: #999;">Ajoutez d'abord des participants</p>
                 </div>
-                <button class="btn-secondary" onclick="createExclusionGroup()" style="margin-top: 10px;">🚫 Create
-                    Exclusion Group</button>
+                <button class="btn-secondary" onclick="createExclusionGroup()" style="margin-top: 10px;">🚫 Créer
+                    un groupe d'exclusion</button>
             </div>
 
             <div id="exclusionGroupsList"></div>
@@ -71,7 +71,7 @@
 
         <!-- Generate Button -->
         <button class="btn-primary generate-btn" onclick="generateAssignments()">
-            🎄 Generate Secret Santa Assignments 🎄
+            🎄 Générer les tirages du Secret Santa 🎄
         </button>
 
         <!-- Error Message -->
@@ -79,12 +79,12 @@
 
         <!-- Results Card -->
         <div class="card results" id="resultsCard">
-            <h2>🎉 Assignments</h2>
+            <h2>🎉 Tirages</h2>
             <div class="seed-info" id="seedInfo"></div>
             
-            <div class="view-toggle">
-                <button id="listViewBtn" class="active" onclick="switchView('list')">📋 List View</button>
-                <button id="graphViewBtn" onclick="switchView('graph')">🔗 Graph View</button>
+                <div class="view-toggle">
+                <button id="listViewBtn" class="active" onclick="switchView('list')">📋 Vue Liste</button>
+                <button id="graphViewBtn" onclick="switchView('graph')">🔗 Vue Graphique</button>
             </div>
             
             <div class="list-view" id="listView">
@@ -104,19 +104,19 @@
             <div id="individualLinksContainer"></div>
 
             <div class="share-section">
-                <label>📤 Share this configuration:</label>
+                <label>📤 Partager cette configuration :</label>
                 <div class="share-url">
-                    <input type="text" id="shareUrl" readonly placeholder="Generate assignments to get a shareable link">
-                    <button onclick="copyShareUrl()">📋 Copy</button>
+                    <input type="text" id="shareUrl" readonly placeholder="Générez les tirages pour obtenir un lien partageable">
+                    <button onclick="copyShareUrl()">📋 Copier</button>
                 </div>
             </div>
         </div>
 
-        <div class="copied-toast" id="copiedToast">✓ Copied to clipboard!</div>
+        <div class="copied-toast" id="copiedToast">✓ Copié dans le presse-papiers&nbsp;!</div>
     </div>
 
     <footer>
-        <p>Made with ❤️ for the holiday season</p>
+        <p>Fait avec ❤️ pour la saison des fêtes</p>
     </footer>
 
     <script src="assets/js/main.js"></script>
