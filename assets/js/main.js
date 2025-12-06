@@ -264,6 +264,34 @@ function displayResults(assignments, seed) {
     // Draw graph
     drawGraph(assignments);
 
+    // For the person doing the draft (the one who generated assignments on this page),
+    // hide/blur the detailed results initially so they don't immediately see the full graph.
+    // Provide a reveal button that removes the blur when clicked.
+    const listView = document.getElementById('listView');
+    const graphContainer = document.getElementById('graphContainer');
+    // Add masked class to blur content
+    if (assignmentsList) assignmentsList.classList.add('masked');
+    if (graphContainer) graphContainer.classList.add('masked');
+
+    // Create a reveal button (only once)
+    if (!document.getElementById('revealFullBtn')) {
+        const revealBtn = document.createElement('button');
+        revealBtn.id = 'revealFullBtn';
+        revealBtn.className = 'btn-secondary reveal-btn';
+        revealBtn.textContent = '🔓 Reveal Full Assignments';
+        revealBtn.title = 'Reveal the full assignments for everyone (only do this when ready)';
+        revealBtn.onclick = () => {
+            if (assignmentsList) assignmentsList.classList.remove('masked');
+            if (graphContainer) graphContainer.classList.remove('masked');
+            revealBtn.style.display = 'none';
+        };
+
+        // Insert the reveal button just after the seed info and before the view toggle/list
+        if (resultsCard && listView) {
+            listView.before(revealBtn);
+        }
+    }
+
     // Update shareable URL and individual links
     updateUrlWithData(seed);
     generateIndividualLinks(assignments, seed);
