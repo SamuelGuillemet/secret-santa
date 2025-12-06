@@ -297,7 +297,7 @@ function displayResults(assignments, seed) {
         const revealBtn = document.createElement('button');
         revealBtn.id = 'revealFullBtn';
         revealBtn.className = 'btn-secondary reveal-btn';
-        revealBtn.textContent = '🔓 Reveal Full Assignments';
+        revealBtn.textContent = '🔓 Afficher le résultat';
         revealBtn.title = 'Reveal the full assignments for everyone (only do this when ready)';
         revealBtn.onclick = () => {
             if (assignmentsList) assignmentsList.classList.remove('masked');
@@ -323,18 +323,54 @@ function displayResults(assignments, seed) {
 function generateIndividualLinks(assignments, seed) {
     const container = document.getElementById('individualLinksContainer');
     if (!container) return;
-
     container.innerHTML = `
         <div class="individual-links">
             <h3>🔗 Liens individuels (partagez-les en privé avec chaque personne)</h3>
             <div class="individual-links-list">
                 ${Object.keys(assignments).map(person => {
         const url = generateIndividualUrl(person, seed);
-        return `<a href="${url}" class="individual-link" target="_blank">${person}</a>`;
+        return `<button class="individual-link" data-url="${url}">${person}</button>`
     }).join('')}
             </div>
         </div>
     `;
+
+    // Attach copy handlers
+    const copyButtons = container.querySelectorAll('.individual-link');
+    copyButtons.forEach(btn => {
+        btn.addEventListener('click', () => copyTextToClipboard(btn.dataset.url, '✓ Lien individuel copié !'));
+    });
+}
+
+// Copy helper + toast
+function showCopiedToast(message) {
+    const toast = document.getElementById('copiedToast');
+    if (!toast) return;
+    toast.textContent = message || '✓ Copié dans le presse-papiers !';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function copyTextToClipboard(text, message) {
+    if (!text) return;
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(() => showCopiedToast(message), () => {
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy'); showCopiedToast(message);
+            ta.remove();
+        });
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy'); showCopiedToast(message);
+        ta.remove();
+    }
 }
 
 // Generate URL for individual view
